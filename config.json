@@ -1,0 +1,27 @@
+{
+  "ownerNumber": "6289660042502@s.whatsapp.net",
+  "pairingNumber": "+6287866042073",
+  "ownerName": "Arsyl",
+  "botName": "HuTao",
+  "packname": "instagram",
+  "author": "@botx.id",
+  "pathimg": "./media/ranzz.jpeg",
+  "apikey": {
+    "xcode": "arsyl"
+  },
+  "hmm": {
+    "yt": "https://youtube.com/@botx.id",
+    "ig": "https://instagram.com/@botx.id",
+    "linkmenu": "https://chat.whatsapp.com/EKy1F22dyVX8yWCcIU5rEQ"
+  },
+  "donasi": {
+	"dana": "083875121917",
+	"gopay": "https://saweria.co/RanzzReall"
+  },
+  "gamewaktu": 30,
+  "limitCount":15,
+  "gcount": {
+	"prem": 100,
+	"user": 10
+  }
+}

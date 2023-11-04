@@ -1,0 +1,13 @@
+{
+  "wait": "tunggu sebentar, data sedang diproses!",
+  "error": {
+    "Iv": "link yang kamu berikan tidak valid",
+    "api": "maaf terjadi kesalahan, silahan hubungi owner"
+  },
+  "OnlyGrup": "perintah ini hanya bisa digunakan di grup",
+  "OnlyPM": "perintah ini hanya bisa digunakan di private message",
+  "GrupAdmin": "sepertinya kamu bukan admin digrup ini",
+  "BotAdmin": "bot harus dijadikan admin terlebih dahulu",
+  "OnlyOwner": "perintah ini hanya dapat digunakan oleh owner",
+  "OnlyPrem": "kamu bukan pengguna premium! silakan ketik *#premium*"
+}
