@@ -683,10 +683,20 @@ Games Draw, Tidak Ada Pemenang`
 			case prefix+'premium':
 			    reply(`_Ingin upgrade premium user? hanya Rp1.000,- saja untuk satu bulan 🎫_\n\n_*Kelebihan*_:\n- Mendapatkan limit hari unlimited\n- Mendapatkan limit game 100/100\n- Mendapatkan akses fitur premium\n- Mendapatkan prioritas support\n\n_*Payment (QRIS)*_ :\nsaweria.co/botx\n\n_Sudah bayar? Kirim screenshot bukti pembayaran kepada owner bot_`)
 		        	 break
-      case prefix+'donasi':
-      case prefix+'donate':
-            reply(`*[❗] DONASI - SERVER*\n\n_Donasi agar bot tetap online dan bisa tetap gratis selama online_\n\n*QRIS* : https://bot-x.my.id/donasi\n\n_Terimakasih telah donasi, akan kami gunakan untuk server bot!_`)
-               break
+
+               case prefix+'donasi':
+                if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
+                 var req = await (await fetch(`https://api.zahwazein.xyz/convert/ssweb?url=https://saweria.co/widgets/leaderboard?streamKey=a66f66161aeedd1b4366fea653ae8217&query=desktop&apikey=zenzkey_7b2869ebf5be`)).json()
+                 var { code } = req
+                 if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
+                 var { result } = req
+                 var teks = `*[❗] DONASI - SERVER*\n\n`
+                 teks += `_Donasi agar bot tetap online dan bisa tetap gratis selama online_\n\n`
+                 teks += `*QRIS* : https://saweria.co/botx\n\n`
+                 teks += `_Terimakasih telah donasi, akan kami gunakan untuk server bot!_`
+                 conn.sendMessage(from, { image: { url: result.url }, caption: teks }, { quoted: msg })
+                 break                 
+
       case prefix+'werewolf':
       case prefix+'ww':
       case prefix+'sambungkata':
@@ -1130,7 +1140,7 @@ Games Draw, Tidak Ada Pemenang`
                     var { code } = req
                     if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                     var { line_type, country_name, carrier } = req                    
-                    var teks = `*[ PHONE INFO ]*\n\n• *Country :* ${country_name}\n• *Carrier :* ${carrier}\n• *Type :* ${line_type}`
+                    var teks = `*[ PHONE LOOKUP ]*\n\n• *Country :* ${country_name}\n• *Carrier :* ${carrier}\n• *Type :* ${line_type}`
                     reply(teks)
                     limitAdd(sender, limit)
                 break                    
@@ -1597,7 +1607,8 @@ Games Draw, Tidak Ada Pemenang`
                    var data = (await axios.get('https://waifu.pics/api/nsfw/blowjob')).data.url
                    conn.sendMessage(from, { image: { url: data }}, { quoted: msg })
                    limitAdd(sender, limit)
-                   break                    
+                   break 
+                                    
                                                                               
             // PhotoOxy Menu
             case prefix+'flaming':
