@@ -59,17 +59,10 @@ exports.allmenu = (sender, prefix, pushname, isOwner, isPremium, balance, limit,
    × ${prefix}stablediff
    × ${prefix}blackbox
    × ${prefix}chatty
- 
- *乂  M E S S A G E*
-
-   × ${prefix}start
-   × ${prefix}skip
-   × ${prefix}stop
-   × ${prefix}send
-   × ${prefix}menfess
 
  *乂  D O W L O A D E R*
 
+   × ${prefix}play
    × ${prefix}tiktok
    × ${prefix}instagram
    × ${prefix}ytmp4
@@ -77,6 +70,7 @@ exports.allmenu = (sender, prefix, pushname, isOwner, isPremium, balance, limit,
   
  *乂  R A N D O M*
 
+   × ${prefix}menfess
    × ${prefix}quote
    × ${prefix}artinama
    × ${prefix}fakta
@@ -124,6 +118,7 @@ exports.allmenu = (sender, prefix, pushname, isOwner, isPremium, balance, limit,
    × ${prefix}gopay
    × ${prefix}dana
    × ${prefix}mahasiswa
+   × ${prefix}lookup
    × ${prefix}cek-nik
 
  *乂  C H A R - A I*
@@ -138,6 +133,7 @@ exports.allmenu = (sender, prefix, pushname, isOwner, isPremium, balance, limit,
    × ${prefix}ashel
    × ${prefix}hinata
    × ${prefix}adel
+   × ${prefix}luffy
    × ${prefix}azizi
    × ${prefix}curhat
 

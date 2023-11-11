@@ -99,7 +99,6 @@ let premium = JSON.parse(fs.readFileSync('./database/premium.json'));
 let balance = JSON.parse(fs.readFileSync('./database/balance.json'));
 let limit = JSON.parse(fs.readFileSync('./database/limit.json'));
 let glimit = JSON.parse(fs.readFileSync('./database/glimit.json'));
-let anonymous = JSON.parse(fs.readFileSync('./database/anonymous.json'));
 let secreto = JSON.parse(fs.readFileSync('./database/secreto_balas.json'));
 let antilink = JSON.parse(fs.readFileSync('./database/antilink.json'));
 
@@ -378,37 +377,7 @@ module.exports = async(conn, msg, m, setting, store, welcome) => {
           }
         }
         
-        // Function for Anonymous Chat
-        function anonyCheck(who = '', _db) {
-            return [_db.a, _db.b].includes(who)
-        }
-        function anonyOther(who = '', _db) {
-            return who == _db.a ? _db.b : who == _db.b ? _db.a : ''
-        }
-                
-        // write for anonymous
-        setInterval(async () => {
-            fs.writeFileSync('./database/anonymous.json', JSON.stringify(anonymous, null, 2))
-        }, 30 * 1000)
-        
-        // cek cmd for anonymous
-        var cekForAnon = isCmd && args[0].length > 1
-        
-        // action anonymous
-        if (!isGroup && !msg.key.fromMe && !cekForAnon) {
-            let rums = Object.values(anonymous).find(room => [room.a, room.b].includes(sender) && room.state == "CHATTING")
-            if (rums) {
-                var partnerJID = [rums.a, rums.b].find(user => user !== sender)
-                if (msg.type == "conversation") {
-                    conn.sendMessage(partnerJID, { text: chats })
-                } else if (msg.type == "extendedTextMessage") {
-                    conn.sendMessage(partnerJID, { text: chats, contextInfo: msg.message["extendedTextMessage"].contextInfo })
-                } else {
-                    var contextInfo = msg.message[msg.type].contextInfo
-                    conn.sendMessageFromContent(partnerJID, msg.message, { contextInfo })
-                }
-            }
-        }
+      
         
         // action menfess
         if (!isGroup && !msg.key.fromMe) {
@@ -986,7 +955,16 @@ Games Draw, Tidak Ada Pemenang`
                     if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                     reply(req.result)
                     limitAdd(sender, limit)
-                    break                                         
+                    break
+                  case prefix+'luffy':
+                    if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
+                    if (args.length < 2) return reply(`Kirim perintah ${command} pertanyaan`)
+                    var req = await (await fetch(`https://api-kazedevid.vercel.app/ai/charaai?chara=Luffy&text=${q}`)).json()
+                    var { code } = req
+                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
+                    reply(req)
+                    limitAdd(sender, limit)
+                    break                                                               
                   case prefix+'adel':
                     if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
                     if (args.length < 2) return reply(`Kirim perintah ${command} pertanyaan`)
@@ -1028,7 +1006,7 @@ Games Draw, Tidak Ada Pemenang`
                 case prefix+'negara': case prefix+'country':
                   if (!isPremium) return reply(`kamu bukan pengguna premium! silakan ketik *#premium*`)
                   if (args.length < 2) return reply(`Kirim perintah ${command} query`)
-                  var req = await (await fetch(`https://api.neoxr.eu/api/country?q=${q}&apikey=apikeygw`)).json()
+                  var req = await (await fetch(`https://api.neoxr.eu/api/country?q=${q}&apikey=apiarsyl`)).json()
                   var { code } = req
                   if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                   reply(req.data)
@@ -1048,7 +1026,7 @@ Games Draw, Tidak Ada Pemenang`
                 case prefix+'simi': case prefix+'simsimi':
                   if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
                   if (args.length < 2) return reply(`Kirim perintah ${command} halo`)
-                  var req = await (await fetch(`https://api.lolhuman.xyz/api/simi?apikey=arsyl&text=${q}&badword=true`)).json()
+                  var req = await (await fetch(`https://api.xfarr.com/api/entertainment/simsimi?apikey=arsyl&chat=${q}`)).json()
                   var { code } = req
                   if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                   reply(req.result)
@@ -1058,7 +1036,7 @@ Games Draw, Tidak Ada Pemenang`
                    case prefix+'bard': case prefix+'brainly':
                    if (!isPremium) return reply(`kamu bukan pengguna premium! silakan ketik *#premium*`)
                    if (args.length < 2) return reply(`Kirim perintah ${command} query`)
-                   var req = await (await fetch(`https://api.neoxr.eu/api/bard?q=${q}&apikey=apikeygw`)).json()
+                   var req = await (await fetch(`https://api.neoxr.eu/api/bard?q=${q}&apikey=apiarsyl`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                    reply(req.data.message)
@@ -1211,103 +1189,7 @@ Games Draw, Tidak Ada Pemenang`
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                    reply(req.data.answer)
                    limitAdd(sender, limit)
-                   break
-                // Anonymous Menu
-                case prefix+'anonymous':
-                   if (isGroup) return reply(mess.OnlyPM)
-                   var teks = `Hai ${pushname !== undefined ? pushname : 'Kak'} Selamat Datang di Anonymous Chat\n\nKetik ${prefix}search untuk mencari Teman Chat anda.`
-                   reply(teks)
-                   break
-                case prefix+'start': case prefix+'search':
-                   if (isGroup) return reply(mess.OnlyPM)
-                   var rumss = Object.values(anonymous).find(room => anonyCheck(sender, room))
-                   var rooms = Object.values(anonymous).find(room => anonyCheck(sender, room) && room.state == 'CHATTING')
-                   if (rooms) {
-                     var teks = `Kamu masih berada di dalam anonymous chat, menunggu partner...\n\n Kirim /stop untuk berhenti`
-                     return conn.sendMessage(from, { text: teks })
-                   } else if (rumss) {
-                     var teks = `Menunggu partner...\n\n Kirim /stop untuk berhenti`
-                     return conn.sendMessage(from, { text: teks })
-                   }
-                   var roomm = Object.values(anonymous).find(room => room.state == "WAITING" && !anonyCheck(sender, room))
-                   if (roomm) {
-                     roomm.b = sender
-                     roomm.state = "CHATTING"
-                     var teks = `Partner ditemukan!\n\n- /stop : untuk berhenti\n- /skip : untuk skip\n- /send : untuk mengirim kontakmu`
-                     await conn.sendMessage(roomm.a, { text: teks })
-                     await conn.sendMessage(roomm.b, { text: teks })
-                   } else if (!rooms) {
-                     let id = + new Date
-                     anonymous[id] = {
-                         id,
-                         a: sender,
-                         b: '',
-                         state: "WAITING"
-                     }
-                     var teks = `Menunggu partner...\n\n Kirim /stop untuk berhenti`
-                     await conn.sendMessage(from, { text: teks })
-                   }
-                   break
-                case prefix+'stop':
-                   if (isGroup) return reply(mess.OnlyPM)
-                   var roomo = Object.values(anonymous).find(room => anonyCheck(sender, room))
-                   if (!roomo) {
-                     var teks = `Kamu tidak berada di anonymous chat\n\nkirim /start untuk memulai`
-                     await conn.sendMessage(from, { text: teks })
-                   } else {
-                     var teks = `Kamu telah keluar dari anonymous chat`
-                     var teks2 = `Partner mu telah meninggalkan chat\n\nKirim /start untuk mencari partner baru`
-                     await conn.sendMessage(from, { text: teks })
-                     let other = anonyOther(sender, roomo)
-                     if (other) await conn.sendMessage(other, { text: teks2 })
-                     delete anonymous[roomo.id]
-                   }
-                   break
-                case prefix+'next': case prefix+'skip':
-                   if (isGroup) return reply(mess.OnlyPM)
-                   let romeo = Object.values(anonymous).find(room => anonyCheck(sender, room))
-                   if (!romeo) {
-                     var teks = `Kamu tidak berada di anonymous chat\n\nkirim /start untuk memulai`
-                     return await conn.sendMessage(from, { text: teks })
-                   } else {
-                     let other = anonyOther(sender, romeo)
-                     var teks1 = `Partner mu telah meninggalkan chat\n\nKirim /start untuk mencari partner baru`
-                     if (other) await conn.sendMessage(other, { text: teks1 })
-                     delete anonymous[romeo.id]
-                   }
-                   let room = Object.values(anonymous).find(room => room.state == "WAITING" && !anonyCheck(sender, room))
-                   if (room) {
-                     room.b = sender
-                     room.state = "CHATTING"
-                     var teks = `Partner ditemukan!\n\n- /stop : untuk berhenti\n- /skip : untuk skip\n- /send : untuk mengirim kontakmu`
-                     await conn.sendMessage(room.a, { text: teks })
-                     await conn.sendMessage(room.b, { text: teks })
-                   } else {
-                     let id = + new Date
-                     anonymous[id] = {
-                         id,
-                         a: sender,
-                         b: '',
-                         state: "WAITING"
-                     }
-                     var teks = `Menunggu partner...\n\n Kirim /stop untuk berhenti`
-                     await conn.sendMessage(from, { text: teks })
-                   }
-                   break
-                case prefix+'sendprofile': case prefix+'sendprofil':
-                   if (isGroup) return reply(mess.OnlyPM)
-                   let romoe = Object.values(anonymous).find(room => anonyCheck(sender, room) && room.state == 'CHATTING')
-                   if (!romoe) {
-                     var teks = `Kamu tidak berada di anonymous chat\n\nkirim /start untuk memulai`
-                     await conn.sendMessage(from, { text: teks })
-                   } else {
-                     let rms = Object.values(anonymous).find(room => [room.a, room.b].includes(sender) && room.state == "CHATTING")
-                     var partnerJID = anonyOther(sender, rms)
-                     var res = await conn.sendContact(partnerJID, [sender.split("@")[0]])
-                     conn.sendMessage(from, { text: '[✅] Berhasil mengirim profil ke teman chat anda!' }, { quoted: msg })
-                     conn.sendMessage(partnerJID, { text: '[👨👩] Teman chat kamu memberikan kontak profil nya!' }, { quoted: res })
-                   }
-                   break
+                   break               
             case prefix+'menfess':
                 if (isGroup) return reply(mess.OnlyPM)
                 if (!isPremium) return reply(`kamu bukan pengguna premium! silakan ketik *#premium*`)
@@ -1387,17 +1269,17 @@ Games Draw, Tidak Ada Pemenang`
                    if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
                    if (args.length < 2) return reply(`Kirim perintah ${command} query`)
                    reply(mess.wait)
-                   var req = await (await fetch(`https://api.neoxr.eu/api/play?q=${q}&apikey=apikeygw`)).json()
+                   var req = await (await fetch(`https://api.xfarr.com/api/download/ytplay2?apikey=arsyl&query=${q}`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
-                   var { title, thumbnail, views, duration, data } = req
+                   var { title, thumbnail, sizeF, quality, url } = req.result
                    var teks = `*[ YOUTUBE PLAY ]*\n\n`
                    teks += `• *Title :* ${title}\n`
-                   teks += `• *Views :* ${views}\n`
-                   teks += `• *Duration :* ${duration}\n\n`
+                   teks += `• *Size :* ${sizeF}\n`
+                   teks += `• *Quality :* ${quality}\n\n`
                    teks += `_Tunggu sebentar, permintaanmu sedang dikirim oleh bot_`
                    conn.sendMessage(from, { image: { url: thumbnail }, caption: teks }, { quoted: msg })
-                   conn.sendMessage(from, { audio: { url: data.url }, mimetype: 'audio/mp4' }, { quoted: msg })
+                   conn.sendMessage(from, { audio: { url: url }, mimetype: 'audio/mp4' }, { quoted: msg })
                    limitAdd(sender, limit)
                    break
              case prefix+'ytmp4':
@@ -1406,17 +1288,17 @@ Games Draw, Tidak Ada Pemenang`
                    if (!isUrl(args[1])) return reply(mess.error.Iv)
                    if (!args[1].includes('youtu')) return reply(mess.error.Iv)
                    reply(mess.wait)
-                   var req = await (await fetch(`https://api.lolhuman.xyz/api/ytvideo?apikey=arsyl&url=${args[1]}`)).json()
+                   var req = await (await fetch(`https://api.xfarr.com/api/download/ytvideo2?apikey=arsyl&url=${args[1]}`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
-                   var { title, thumbnail, channel, view, link } = req.result
+                   var { title, thumbnail, quality, id, url } = req.result
                    var teks = `*[ YOUTUBE VIDEO ]*\n\n`
                    teks += `• *Title :* ${title}\n`
-                   teks += `• *Channel :* ${channel}\n`
-                   teks += `• *Views :* ${view}\n\n`
+                   teks += `• *Quality :* ${quality}\n`
+                   teks += `• *Video ID :* ${id}\n\n`
                    teks += `_Tunggu sebentar, permintaanmu sedang dikirim oleh bot_`
                    conn.sendMessage(from, { image: { url: thumbnail }, caption: teks }, { quoted: msg })
-                   conn.sendMessage(from, { video: { url: link.link }}, { quoted: msg })
+                   conn.sendMessage(from, { video: { url: url }}, { quoted: msg })
                    limitAdd(sender, limit)
                    break                
              case prefix+'ytmp3':
@@ -1425,16 +1307,16 @@ Games Draw, Tidak Ada Pemenang`
                    if (!isUrl(args[1])) return reply(mess.error.Iv)
                    if (!args[1].includes('youtu')) return reply(mess.error.Iv)
                    reply(mess.wait)
-                   var req = await (await fetch(`https://api.xcodeteam.xyz/api/downloader/youtube-audio?api_key=${setting.apikey.xcode}&video_url=${args[1]}`)).json()
+                   var req = await (await fetch(`https://api.xfarr.com/api/download/ytaudio2?apikey=arsyl&url=${setting.apikey.xcode}&video_url=${args[1]}`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
-                   var { title, thumb, channel, published, views, url } = req.data
+                   var { title, thumbnail, quality, sizeF, url } = req.result
                    var teks = `*[ YOUTUBE AUDIO ]*\n\n`
                    teks += `• *Title :* ${title}\n`
-                   teks += `• *Channel :* ${channel}\n`
-                   teks += `• *Views :* ${views}\n\n`
+                   teks += `• *Size :* ${sizeF}\n`
+                   teks += `• *Quality :* ${quality}\n\n`
                    teks += `_Tunggu sebentar, permintaanmu sedang dikirim oleh bot_`
-                   conn.sendMessage(from, { image: { url: thumb }, caption: teks }, { quoted: msg })
+                   conn.sendMessage(from, { image: { url: thumbnail }, caption: teks }, { quoted: msg })
                    conn.sendMessage(from, { audio: { url: url }, mimetype: 'audio/mp4' }, { quoted: msg })
                    limitAdd(sender, limit)
                    break                   
@@ -1784,20 +1666,40 @@ Games Draw, Tidak Ada Pemenang`
                    reply(teks)
                    limitAdd(sender, limit)
                    break
+               case prefix+'cekresi': case prefix+'resi':
+                   if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
+                   if (args.length < 2) return reply(`Kirim perintah ${command} query`)
+                   reply(mess.wait)
+                   var req = await (await fetch(`https://api.lolhuman.xyz/api/checkresi?apikey=arsyl&resi=${q}`)).json()
+                   var { code } = req
+                   if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
+                   var no = 1
+                   var teks = `*[ RESI HISTORY ]*\n\n`
+                   for (let i of req.result.history) {
+                   	var { note, time } = i
+                       teks += `*(${no++})*\n`
+                       teks += `• *Keterangan :* ${note}\n`
+                       teks += `• *Waktu :* ${time}\n\n`
+                   }
+                   reply(teks)
+                   limitAdd(sender, limit)
+                   break                  
                case prefix+'layarkaca21': case prefix+'lk21':
                    if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
                    if (args.length < 2) return reply(`Kirim perintah ${command} judul`)
                    reply(mess.wait)
-                   var req = await (await fetch(`https://api.xfarr.com/api/moviestory/lk21search?apikey=FKIIiLdKas&query=${q}`)).json()
+                   var req = await (await fetch(`https://api.xfarr.com/api/moviestory/lk21search?apikey=arsyl&query=${q}`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                    var no = 1
-                   var teks = `*LAYARKACA 21*\n\n`
+                   var teks = `*[ LAYARKACA 21 ]*\n\n`
                    for (let i of req.result) {
-                   	var { url, title } = i
-                       teks += `*(${no++})*\n`
-                       teks += `• *Url :* ${url}\n`
-                       teks += `• *Title :* ${title}\n\n`
+                   	var { stars, sutradara, url, title } = i
+                       teks += `(${no++}) ${title}\n`
+                       teks += `-----------------------\n`
+                       teks += `• *Artis :* ${stars}\n`
+                       teks += `• *Sutradara :* ${sutradara}\n`
+                       teks += `• *Video Url :* ${url}\n\n`
                    }
                    reply(teks)
                    limitAdd(sender, limit)
@@ -1806,7 +1708,7 @@ Games Draw, Tidak Ada Pemenang`
                    if (isLimit(sender, isPremium, isOwner, limitCount, limit)) return reply (`Limit kamu sudah habis! ketik ${prefix}buylimit untuk membeli limit atau bisa membeli premium untuk mendapatkan limit tidak terbatas`)
                    if (args.length < 2) return reply(`Kirim perintah ${command} judul`)
                    reply(mess.wait)
-                   var req = await (await fetch(`https://api.neoxr.eu/api/drakor?q=${q}&apikey=apikeygw`)).json()
+                   var req = await (await fetch(`https://api.neoxr.eu/api/drakor?q=${q}&apikey=apiarsyl`)).json()
                    var { code } = req
                    if ([400, 403, 404, 429, 500].includes(code)) return reply(mess.error.api)
                    var no = 1
